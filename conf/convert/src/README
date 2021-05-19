@@ -1,0 +1,7 @@
+Run the converter tool with
+
+"./conv_lat <inputformat> <inputfile> <outputformat> <outputfile>".
+
+Inut and output formats are integer numbers.
+An overview of the supported input and output formats is given in "io.h".
+
