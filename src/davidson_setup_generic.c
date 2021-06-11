@@ -189,27 +189,64 @@ void dense_ev_PRECISION_driver( void *eig_val, complex_PRECISION *eig_vec, compl
   else {
     complex_PRECISION *ev = (complex_PRECISION*) eig_val;
 
+//     FILE *fop;
+//     fop = fopen("H1H2.m","w");
+//     fprintf(fop,"H1 = [\n");
+//     for( int i = 0; i<n; i++ ) {
+//       for( int j = 0; j<n; j++ ) {
+//         fprintf(fop,"%+.14lf%+.14lfi ", CSPLIT(A[i+j*n]));
+//       }
+//       fprintf(fop,";\n");
+//     }
+//     fprintf(fop,"];\n");
+//     fprintf(fop,"H2 = [\n");
+//     for( int i = 0; i<n; i++ ) {
+//       for( int j = 0; j<n; j++ ) {
+//         fprintf(fop,"%+.14lf%+.14lfi ", CSPLIT(B[i+j*n]));
+//       }
+//       fprintf(fop,";\n");
+//     }
+//     fprintf(fop,"];\n");
+    
     // transform A x = lambda B x to B^-1 A x = lambda x and solve standard eigenvalue problem
     matrix_full_inverse_PRECISION( work, B, n, n, n); // buffer B^-1 into work
     gemm_PRECISION( &N, &N, &n, &n, &n, &one, work, &n, A, &n, &zero, Binv_A, &n ); //Binv_A = B^-1 A
     geev_PRECISION( &N, &V, &n, Binv_A, &n, ev, NULL, &n, eig_vec, &n, work, &lwork, rwork, &info );
     if( info ) error0("LAPACK error in geev_PRECISION! Errorcode: %d\n", info);
     
+//     complex_PRECISION phase;
+//     for( int i=0; i<n; i++) {
+//       phase = cabs(*(eig_vec+i*n))/(*(eig_vec+i*n));
+//       for( int j=0; j<n; j++) {
+//         *(eig_vec+i*n+j) *= phase;
+//       }
+//     }
+    
+//     fprintf(fop,"VV=[\n");
+//     for (int i = 0; i<n; i++) {
+//       for (int j = 0; j<n; j++) {
+//         fprintf(fop,"%+.16lf%+.16lfi ", CSPLIT(*(s+i*d->maxsize+j)));
+//         fprintf(fop,"%+.16lf%+.16lfi ", CSPLIT(*(eig_vec+i+j*n)));
+//       }
+//       fprintf(fop,";\n");
+//     }
+//     fprintf(fop,"];\n");
+//     fprintf(fop,"theta = [\n");
+//     for (int i = 0; i<n; i++) {
+//       fprintf(fop,"%+.16lf%+.16lfi\n", CSPLIT(ev[i]));
+//     }
+//     fprintf(fop,"];\n");
+//     
+//     printf0("restart EV end\n");
+//     fclose(fop);
+//     getchar();
+    
 //     // LAPACK routine for generalized eigenvalue problem
 //     ggev_PRECISION( &N, &V, &n, A, &n, B, &n, alpha, beta, NULL, &n, eig_vec, &n, work, &lwork, rwork, &info );
 //     if( info ) error0("LAPACK error in ggev_PRECISION! Errorcode: %d\n", info);
 //     // obtain eigenvalues and cast to PRECISION
 //     for ( int i=0; i<n; i++ ) ev[i] = (complex_PRECISION) alpha[i]/beta[i]; //NOTE: division might be dangerous (need kappa(A) ~ kappa(B) to be safe)
-    
-//   printf0("s=\n");
-//   for (int i = 0; i<5; i++) {
-//     for (int j = 0; j<5; j++) {
-//       printf0("%+.16lf%+.16lfi ", CSPLIT(*(eig_vec+i*n+j)));
-//     }
-//     printf0("\n");
-//   }
-//   getchar();
-    
+  
     // sort eigenvalues ascending in absolute value
     for( int i=0; i<n; i++ ) pi[i] = i+1;
     for( int i=n; i>1; i-- )
@@ -236,7 +273,38 @@ FREE( work, complex_PRECISION, lwork );
 void define_next_level_PRECISION( davidson_setup_PRECISION_struct *d, level_struct *l, Thread *threading ) {
 
   int vs = l->inner_vector_size, n = l->num_eig_vect; 
+//   PRECISION norm;
+//   vector_PRECISION ones = NULL, r = NULL;
+//   MALLOC( ones, complex_PRECISION, n);
+//   MALLOC( r, complex_PRECISION, vs);
   
+//   FILE *fop;
+//   fop = fopen("V_init.m","w");
+//   fprintf(fop,"Vinit = [");
+//   for ( int i = 0; i<2*n; i++ ) {
+//     trans_back_PRECISION( (complex_double*) d->W[i], (complex_PRECISION*) d->V[i], l->s_PRECISION.op.translation_table, l, threading );
+//     for ( int j = 0; j<vs; j++ )
+//       fprintf(fop,"%+.16lf%+.16lfi ", CSPLIT(d->W[i][j]));
+//     fprintf(fop,";\n");
+//   }
+//   fprintf(fop,"];\n");
+//   fprintf(fop,"Vinit=Vinit.';\n");
+//   fclose(fop);
+//   printf0("\nVinit end\n");
+//   for ( int j = 0; j<5; j++ )
+//     printf0("%+.16lf%+.16lfi ", CSPLIT(d->V[0][j]));
+//   printf0(";\n");
+  
+//   getchar();
+//   vector_PRECISION_define( r, 0, 0, vs, l );
+//   vector_PRECISION_define( ones, 1, 0, n, l );
+//   vector_PRECISION_multi_saxpy( r, d->V, ones, 1, n, 0, vs, l );
+//   norm = global_norm_PRECISION( r, 0, vs, l, threading );
+//   printf0("norm V*ones = %+.15lf\n", norm );
+//   getchar();
+//   for ( int i = 0; i<5; i++ ) {
+//     printf0("define V[0,%d] = %+.15lf%+.15lfi\n",i, d->V[0][i]);
+//   }
 #ifndef INTERPOLATION_SETUP_LAYOUT_OPTIMIZED_PRECISION
   for ( int k=0; k<n; k++ ) {
     vector_PRECISION_copy( l->is_PRECISION.test_vector[k], d->V[k], 0, vs, l );
@@ -246,15 +314,37 @@ void define_next_level_PRECISION( davidson_setup_PRECISION_struct *d, level_stru
 #endif
   
   testvector_analysis_PRECISION( l->is_PRECISION.test_vector, l, threading );
-if( d->initial_phase ) {
   #ifdef INTERPOLATION_SETUP_LAYOUT_OPTIMIZED_PRECISION
     define_interpolation_PRECISION_operator( l->is_PRECISION.test_vector, l, threading );
     gram_schmidt_on_aggregates_PRECISION_vectorized( l->is_PRECISION.operator, n, l, threading );
   #else
-    gram_schmidt_on_aggregates_PRECISION( l->is_PRECISION.interpolation, n, l, threading );
+//     gram_schmidt_on_aggregates_PRECISION( l->is_PRECISION.interpolation, n, l, threading );
+    householder_qr_on_aggregates_PRECISION( l->is_PRECISION.interpolation, n, l, threading ); 
     define_interpolation_PRECISION_operator( l->is_PRECISION.interpolation, l, threading );
+//     vector_PRECISION_define( r, 0, 0, vs, l );
+//     vector_PRECISION_define( ones, 1, 0, n, l );
+//     vector_PRECISION_multi_saxpy( r, l->is_PRECISION.interpolation, ones, 1, n, 0, vs, l );
+//     norm = global_norm_PRECISION( r, 0, vs, l, threading );
+//     printf0("norm P*ones = %+.15lf\n", norm );
+//     fop = fopen("P_init.m","w");
+//     fprintf(fop,"Pinit = [");
+//     for ( int i = 0; i<n; i++ ) {
+//       trans_back_PRECISION( (complex_double*) d->W[i], (complex_PRECISION*) l->is_PRECISION.interpolation[i], l->s_PRECISION.op.translation_table, l, threading );
+//       for ( int j = 0; j<vs; j++ )
+//         fprintf(fop,"%+.16lf%+.16lfi ", CSPLIT(d->W[i][j]));
+//       fprintf(fop,";\n");
+//     }
+//   fprintf(fop,"];\n");
+//   fprintf(fop,"Pinit=Pinit.';\n");
+//   fclose(fop);
+//   printf0("\nPinit end\n");
+//   for ( int j = 0; j<5; j++ )
+//     printf0("%+.16lf%+.16lfi ", CSPLIT(l->is_PRECISION.interpolation[0][j]));
+//   printf0(";\n");
+//     getchar();
   #endif
-  }
+//   FREE( ones, complex_PRECISION, n);
+//   FREE( r, complex_PRECISION, vs);
 }
 
 
@@ -267,49 +357,57 @@ void get_residual_PRECISION( vector_PRECISION res, davidson_setup_PRECISION_stru
   complex_PRECISION *s = d->s, v[m*m];
   vector_PRECISION u = d->u, Au = d->Au;
   
-  FILE *fop;
-  fop = fopen("H1H2.m","w");
-  fprintf(fop,"H1 = [\n");
-  for( int i = 0; i<m; i++ ) {
-    for( int j = 0; j<m; j++ ) {
-      fprintf(fop,"%+.14lf%+.14lfi ", CSPLIT(d->H1[i][j]));
-    }
-    fprintf(fop,";\n");
-  }
-  fprintf(fop,"];\n");
-  fprintf(fop,"H2 = [\n");
-  for( int i = 0; i<m; i++ ) {
-    for( int j = 0; j<m; j++ ) {
-      fprintf(fop,"%+.14lf%+.14lfi ", CSPLIT(d->H2[i][j]));
-    }
-    fprintf(fop,";\n");
-  }
-  fprintf(fop,"];\n");
-//   printf0("done\n");
-//   getchar();
+//   FILE *fop;
+//   fop = fopen("H1H2.m","w");
+//   fprintf(fop,"H1 = [\n");
+//   for( int i = 0; i<m; i++ ) {
+//     for( int j = 0; j<m; j++ ) {
+//       fprintf(fop,"%+.14lf%+.14lfi ", CSPLIT(d->H1[i][j]));
+//     }
+//     fprintf(fop,";\n");
+//   }
+//   fprintf(fop,"];\n");
+//   fprintf(fop,"H2 = [\n");
+//   for( int i = 0; i<m; i++ ) {
+//     for( int j = 0; j<m; j++ ) {
+//       fprintf(fop,"%+.14lf%+.14lfi ", CSPLIT(d->H2[i][j]));
+//     }
+//     fprintf(fop,";\n");
+//   }
+//   fprintf(fop,"];\n");
   
   // compute eigenvalues
   dense_ev_PRECISION_driver( d->theta, v, d->H1, d->H2, m );
+  complex_PRECISION phase;
+  for( int i=0; i<m; i++) {
+    phase = cabs(*(v+i*m))/(*(v+i*m));
+//     printf0("phase = %lf\n", phase);
+      for( int j=0; j<m; j++) {
+        *(v+i*m+j) *= phase;
+      }
+  }
+  
   qr_PRECISION( s, v, m, m, d->maxsize );
+//   for (int i=0;i<m;i++) memcpy(s+i*d->maxsize, v+i*m, m*sizeof(complex_PRECISION));
   
-  fprintf(fop,"VV=[\n");
-  for (int i = 0; i<m; i++) {
-    for (int j = 0; j<m; j++) {
-//       fprintf(fop,"%+.16lf%+.16lfi ", CSPLIT(*(s+i*d->maxsize+j)));
-      fprintf(fop,"%+.16lf%+.16lfi ", CSPLIT(*(v+i*m+j)));
-    }
-    fprintf(fop,";\n");
-  }
-  fprintf(fop,"];\n VV = VV.';\n");
-  fprintf(fop,"theta = [\n");
-  for (int i = 0; i<m; i++) {
-    fprintf(fop,"%+.16lf%+.16lfi\n", CSPLIT(d->theta[i]));
-  }
-  fprintf(fop,"];\n");
-  
-  printf0("dense ev end\n");
-  fclose(fop);
-  getchar();
+//   fprintf(fop,"VV=[\n");
+//   for (int i = 0; i<m; i++) {
+//     for (int j = 0; j<m; j++) {
+// //       fprintf(fop,"%+.16lf%+.16lfi ", CSPLIT(*(s+i*d->maxsize+j)));
+//       fprintf(fop,"%+.16lf%+.16lfi ", CSPLIT(*(v+i*m+j)));
+//     }
+//     fprintf(fop,";\n");
+//   }
+//   fprintf(fop,"];\n VV = VV.';\n");
+//   fprintf(fop,"theta = [\n");
+//   for (int i = 0; i<m; i++) {
+//     fprintf(fop,"%+.16lf%+.16lfi\n", CSPLIT(d->theta[i]));
+//   }
+//   fprintf(fop,"];\n");
+//   
+//   printf0("dense ev end\n");
+//   fclose(fop);
+//   getchar();
   
   for( int i=0; i<m; i++) {
     theta[i] = creal(d->theta[i]);
@@ -359,55 +457,12 @@ void get_residual_PRECISION( vector_PRECISION res, davidson_setup_PRECISION_stru
   vector_PRECISION_multi_saxpy( Au, d->AV, s+k*d->maxsize, 1, m, 0, vs, l );
   gamma5_PRECISION( Au, Au, l, threading );
   
-  printf0("k= %d, theta[k] = %+.16lf\n", k, theta[k]);
-  
-//   printf0("s[k]=\n");
-//   for (int j = 0; j<5; j++) {
-//   printf0("%+.16lf%+.16lfi\n", CSPLIT(*(s+k*d->maxsize+j)));
-//     }
-//   printf0("\n");
-//     
-//   printf0("d->V=\n");
-//   for (int i = 0; i<3; i++) {
-//     for (int j = 0; j<5; j++) {
-//       printf0("%+.16lf%+.16lfi ", CSPLIT(d->V[i][j]));
-//     }
-//     printf0("\n");
-//   }
-//   getchar();
-//   
-//     printf0("d->AV=\n");
-//   for (int i = 0; i<2; i++) {
-//     for (int j = 0; j<5; j++) {
-//       printf0("%+.16lf%+.16lfi ", CSPLIT(d->AV[i][j]));
-//     }
-//     printf0("\n");
-//   }
-//   getchar();
-//   
-//   printf0("u=\n");
-//   for (int j = 0; j<5; j++) {
-//     printf0("%+.16lf%+.16lfi\n", CSPLIT(u[j]));
-//   }
-//   printf0("\n");
-//   
-//   printf0("Au=\n");
-//   for (int j = 0; j<5; j++) {
-//     printf0("%+.16lf%+.16lfi\n", CSPLIT(Au[j]));
-//   }
-//   printf0("\n");
+//   printf0("k= %d, theta[k] = %+.16lf\n", k, theta[k]);
   
   // compute and check residual
   vector_PRECISION_saxpy( res, Au, u, -theta[k], 0, vs, l );
   norm = global_norm_PRECISION( res, 0, vs, l, threading );
-//   printf0("\nk = %d, theta = %.14lf, norm(r) = %.14le\n", k, theta[k], norm);
-//   printf0("V=[");
-//   for (int j = 0; j<3072; j++) {
-//     printf0("%+.16lf%+.16lfi; ", CSPLIT(Au[j]));
-//   }
-//   printf0("];\n");
-  
-//   getchar();
+
   
   if( norm < d->tol ) {
     printf0("Lvl %d, iter: %d: Vector %d reached desired accuracy, eigenvalue: %+.16lf\n", l->level, m, d->nconv, theta[k]);
@@ -415,18 +470,6 @@ void get_residual_PRECISION( vector_PRECISION res, davidson_setup_PRECISION_stru
     vector_PRECISION_copy( d->X[d->nconv], u, 0, vs, l );
     d->nconv++; 
 
-//   printf0("d->lambda=\n");
-//   for (int j = 0; j<d->nconv; j++) {
-//     printf0("%+.16lf%+.16lfi\n", CSPLIT(d->lambda[j]));
-//   }
-//   printf0("\n");
-//   
-//   printf0("theta=\n");
-//   for (int j = 0; j<m; j++) {
-//     printf0("%+.16lf%+.16lfi\n", CSPLIT(theta[j]));
-//   }
-//   printf0("\n");
-//     
     // locate next non-converged eigenvalue
     for( ; k<m; k++ ) {
       found = 0;
@@ -489,15 +532,6 @@ void get_residual_PRECISION_on_D( vector_PRECISION res, davidson_setup_PRECISION
   // compute eigenvalues
   dense_ev_PRECISION_driver( d->theta, v, d->H1, NULL, m );
   qr_PRECISION( s, v, m, m, d->maxsize );
-
-//   printf0("s=\n");
-//   for (int i = 0; i<m; i++) {
-//     for (int j = 0; j<m; j++) {
-//       printf0("%+.16lf%+.16lfi ", CSPLIT(*(s+i*d->maxsize+j)));
-//     }
-//     printf0("\n");
-//   }
-//   getchar();
   
   // locate next non-converged eigenvalue
   for( k=0; k<m; k++ ) {
@@ -511,11 +545,6 @@ void get_residual_PRECISION_on_D( vector_PRECISION res, davidson_setup_PRECISION
     if( !found )
       break;
   }
-
-//   for (int i = 0; i<m; i++) {
-//     printf0("theta = %+.16lf%+.16lfi\n", CSPLIT(d->theta[i]));
-//   }
-//   if (!d->initial_phase) getchar();
   
   // project ritz vector up
   vector_PRECISION_define( u, 0, 0, vs, l );
@@ -524,74 +553,16 @@ void get_residual_PRECISION_on_D( vector_PRECISION res, davidson_setup_PRECISION
   vector_PRECISION_scale( u, u, 1/norm, 0, vs, l );
   vector_PRECISION_define( Au, 0, 0, vs, l );
   vector_PRECISION_multi_saxpy( Au, d->AV, s+k*d->maxsize, 1, m, 0, vs, l );
-//   gamma5_PRECISION( Au, Au, l, threading );
   
-//   printf0("s[k]=\n");
-//   for (int j = 0; j<m; j++) {
-//   printf0("%+.16lf%+.16lfi ", CSPLIT(*(s+k*d->maxsize+j)));
-//     }
-//   printf0("\n");
-//     
-//   printf0("d->V=\n");
-//   for (int i = 0; i<3; i++) {
-//     for (int j = 0; j<5; j++) {
-//       printf0("%+.16lf%+.16lfi ", CSPLIT(d->V[i][j]));
-//     }
-//     printf0("\n");
-//   }
-//   getchar();
-//   
-//     printf0("d->AV=\n");
-//   for (int i = 0; i<2; i++) {
-//     for (int j = 0; j<5; j++) {
-//       printf0("%+.16lf%+.16lfi ", CSPLIT(d->AV[i][j]));
-//     }
-//     printf0("\n");
-//   }
-//   getchar();
-//   
-//   printf0("u=\n");
-//   for (int j = 0; j<5; j++) {
-//     printf0("%+.16lf%+.16lfi\n", CSPLIT(u[j]));
-//   }
-//   printf0("\n");
-//   
-//   printf0("Au=\n");
-//   for (int j = 0; j<5; j++) {
-//     printf0("%+.16lf%+.16lfi\n", CSPLIT(Au[j]));
-//   }
-//   printf0("\n");
-  
-  // compute and check residual
+  // compute and check eigenvector residual
   vector_PRECISION_saxpy( res, Au, u, -d->theta[k], 0, vs, l );
   norm = global_norm_PRECISION( res, 0, vs, l, threading );
-//   printf0("\nk = %d, theta = %+.14lf%+.14lfi, norm(r) = %.14le\n", k, CSPLIT(d->theta[k]), norm);
-//   printf0("V=[");
-//   for (int j = 0; j<3072; j++) {
-//     printf0("%+.16lf%+.16lfi; ", CSPLIT(Au[j]));
-//   }
-//   printf0("];\n");
-  
-//   getchar();
   
   if( norm < d->tol ) {
     printf0("Lvl %d, iter: %d: Vector %d reached desired accuracy, eigenvalue: %+.16lf%+.16lfi\n", l->level, m, d->nconv, CSPLIT(d->theta[k]));
     d->lambda[d->nconv] = d->theta[k];
     vector_PRECISION_copy( d->X[d->nconv], u, 0, vs, l );
-    d->nconv++; 
-
-//   printf0("d->lambda=\n");
-//   for (int j = 0; j<d->nconv; j++) {
-//     printf0("%+.16lf%+.16lfi\n", CSPLIT(d->lambda[j]));
-//   }
-//   printf0("\n");
-//   
-//   printf0("theta=\n");
-//   for (int j = 0; j<m; j++) {
-//     printf0("%+.16lf%+.16lfi\n", CSPLIT(theta[j]));
-//   }
-//   printf0("\n");
-//     
+    d->nconv++;
     // locate next non-converged eigenvalue
     for( ; k<m; k++ ) {
       found = 0;
@@ -604,39 +575,18 @@ void get_residual_PRECISION_on_D( vector_PRECISION res, davidson_setup_PRECISION
       if( !found )
         break;
     }
-  
-//   printf0("s_full=\n");
-//   for (int i = 0; i<m; i++) {
-//     for (int j = 0; j<m; j++) {
-//       printf0("%+.16lf%+.16lfi ", CSPLIT(*(s+i*d->maxsize+j)));
-//     }
-//     printf0("\n");
-//   }
-//   printf0("\n");
-//   
-  printf0("s_new=\n");
-  for (int j = 0; j<5; j++) {
-    printf0("%+.16lf%+.16lfi\n", CSPLIT(*(s+k*d->maxsize+j)));
-  }
-  printf0("\n");
-
     // project ritz vector up
     vector_PRECISION_define( u, 0, 0, vs, l );
     vector_PRECISION_multi_saxpy( u, d->V, s+k*d->maxsize, 1, m, 0, vs, l );
     norm = global_norm_PRECISION( u, 0, vs, l, threading );
     vector_PRECISION_scale( u, u, 1/norm, 0, vs, l );
     
-    // recompute ritz estimate from ritz vector (instead of using harmonic ritz value)
-//     apply_operator_PRECISION( Au, u, &(l->p_PRECISION), l, threading );
-    norm = d->theta[k]; //global_inner_product_PRECISION( u, Au, 0, vs, l, threading );
-    
+    // compute eigenvector residual
     vector_PRECISION_define( Au, 0, 0, vs, l );
     vector_PRECISION_multi_saxpy( Au, d->AV, s+k*d->maxsize, 1, m, 0, vs, l );  
-//     gamma5_PRECISION( Au, Au, l, threading );
-    vector_PRECISION_saxpy(res, Au, u, -norm, 0, vs, l );
+    vector_PRECISION_saxpy(res, Au, u, -d->theta[k], 0, vs, l );
     norm = global_norm_PRECISION( res, 0, vs, l, threading );
     printf0("\nnew: k = %d, theta = %+.14lf%+.14lfi, norm(r) = %.14le\n", k, CSPLIT(d->theta[k]), norm);
-//     getchar();
   }
 }
 
@@ -646,6 +596,7 @@ void extend_subspace_PRECISION( vector_PRECISION *V_add, int blocksize, davidson
   /* Updates system matrices after extending the basis */
   
   int m = d->size, vs = l->inner_vector_size;
+//   FILE *fop;
   PRECISION norm;
   complex_PRECISION y[m];
   vector_PRECISION w = d->W[0], ww = d->W[1], *V = d->V, *AV = d->AV;
@@ -696,10 +647,9 @@ void extend_subspace_PRECISION( vector_PRECISION *V_add, int blocksize, davidson
       }
       d->H2[m][m] = global_inner_product_PRECISION( V[m+b], w, 0, vs, l, threading );
     }
+
     d->size += blocksize;
   }
-//   printf0("extend end\n");
-  
 }
 
 
@@ -707,29 +657,21 @@ void extend_subspace_on_D_PRECISION( vector_PRECISION *V_add, int blocksize, dav
   
   /* Updates system matrices after extending the basis */
   
-  int m = d->size, vs = l->inner_vector_size;
+  int m = d->size;
   PRECISION norm;
   complex_PRECISION y[m];
-  vector_PRECISION w = d->W[0], *V = d->V, *AV = d->AV;
   
   if( V_add != NULL ) {
     for( int b = 0; b<blocksize; b++ ) {
       // Add new basis vector to V and AV
-      vector_PRECISION_projection( w, V_add[b], m+b, V, 1, l, threading );
-      norm = global_norm_PRECISION( w, 0, vs, l, threading );
-      vector_PRECISION_scale( V[m+b], w, 1.0/norm, 0, vs, l );
-      apply_operator_PRECISION( AV[m+b], V[m+b], &(l->p_PRECISION), l, threading );
+      vector_PRECISION_projection( d->W[1], V_add[b], m+b, d->V, 1, l, threading );
+      vector_PRECISION_projection( d->W[0], d->W[1], m+b, d->V, 1, l, threading );
+      norm = global_norm_PRECISION( d->W[0], 0, l->inner_vector_size, l, threading );
+      vector_PRECISION_scale( d->V[m+b], d->W[0], 1.0/norm, 0, l->inner_vector_size, l );
+      apply_operator_PRECISION( d->AV[m+b], d->V[m+b], &(l->p_PRECISION), l, threading );
       
-//       printf0("V=[");
-//       for (int j = 0; j<5; j++) {
-//         trans_back_PRECISION( AV[(m+1)%20], AV[m], l->s_PRECISION.op.translation_table, l, threading );
-//         printf0("%+.16lf%+.16lfi; ", CSPLIT(AV[(m+1)%20][j]));
-//       }
-//       printf0("];\n");
-//       getchar();
-        
       // Update H
-      process_multi_inner_product_PRECISION( m, y, V, AV[m+b], 0, vs, l, threading );
+      process_multi_inner_product_PRECISION( m, y, d->V, d->AV[m+b], 0, l->inner_vector_size, l, threading );
       if ( g.num_processes > 1 ) {
         PROF_PRECISION_START( _ALLR );
         MPI_Allreduce( y, d->H1[m+b], m, MPI_COMPLEX_PRECISION, MPI_SUM, (l->depth==0)?g.comm_cart:l->gs_PRECISION.level_comm );
@@ -744,7 +686,7 @@ void extend_subspace_on_D_PRECISION( vector_PRECISION *V_add, int blocksize, dav
           d->H1[m+b][i] = conj_PRECISION(d->H1[i][m+b]);
         }
       }
-      d->H1[m+b][m+b] = global_inner_product_PRECISION( V[m+b], AV[m+b], 0, vs, l, threading );
+      d->H1[m+b][m+b] = global_inner_product_PRECISION( d->V[m+b], d->AV[m+b], 0, l->inner_vector_size, l, threading );
     }
     d->size += blocksize;
   }
@@ -754,7 +696,8 @@ void extend_subspace_on_D_PRECISION( vector_PRECISION *V_add, int blocksize, dav
 void davidson_step_PRECISION( int steps, davidson_setup_PRECISION_struct *d, level_struct *l, Thread *threading ) {
   
   int m;
-
+//   FILE *fop;
+  
   for( int k = 0; k<steps; k++) {
     m = d->size;
 
@@ -776,14 +719,50 @@ void davidson_step_PRECISION( int steps, davidson_setup_PRECISION_struct *d, lev
     else {
       vcycle_PRECISION( d->V[m], NULL, d->res, _NO_RES, l, threading );
     }
-    PRECISION norm = global_norm_PRECISION( d->res, 0, l->inner_vector_size, l, threading );
-    printf0("m = %d norm r = %+.16lf    ", m, norm );
-    norm = global_norm_PRECISION( d->V[m], 0, l->inner_vector_size, l, threading );
-    printf0("norm V[%d] = %+.16lf\n", m, norm );
-    for( int i = 0; i<5; i++ ) 
-      printf0("r[%d] = %+.16lf%+.16lfi\n", i, CSPLIT(d->res[i]));
-    for( int i = 0; i<5; i++ ) 
-      printf0("V[%d,%d] = %+.16lf%+.16lfi\n", m, i, CSPLIT(d->V[m][i]));
+//     PRECISION norm = global_norm_PRECISION( d->res, 0, l->inner_vector_size, l, threading );
+//     printf0("m = %d norm r = %+.16lf    ", m, norm );
+//     norm = global_norm_PRECISION( d->V[m], 0, l->inner_vector_size, l, threading );
+//     printf0("norm V[%d] = %+.16lf\n", m, norm );
+//     for( int i = 0; i<5; i++ )
+//       printf0("r[%d] = %+.16lf%+.16lfi\n", i, CSPLIT(d->res[i]));
+//     for( int i = 0; i<5; i++ )
+//       printf0("V[%d,%d] = %+.16lf%+.16lfi\n", m, i, CSPLIT(d->V[m][i]));
+  
+//   fop = fopen("rkvk.m","w");
+//   fprintf(fop,"rk = [");
+//   trans_back_PRECISION( (complex_double*) d->W[0], (complex_PRECISION*) d->res, l->s_PRECISION.op.translation_table, l, threading );
+//   for ( int j = 0; j<l->inner_vector_size; j++ )
+//     fprintf(fop,"%+.16lf%+.16lfi ", CSPLIT(d->W[0][j]));
+//   fprintf(fop,";\n");
+//   fprintf(fop,"];\n");
+//   fprintf(fop,"rk=rk.';\n");
+// 
+//   fprintf(fop,"vk = [");
+//   trans_back_PRECISION( (complex_double*) d->W[0], (complex_PRECISION*) d->V[m], l->s_PRECISION.op.translation_table, l, threading );
+//   for ( int j = 0; j<l->inner_vector_size; j++ )
+//     fprintf(fop,"%+.16lf%+.16lfi ", CSPLIT(d->W[0][j]));
+//   fprintf(fop,";\n");
+//   fprintf(fop,"];\n");
+//   fprintf(fop,"vk=vk.';\n");
+//   fclose(fop);
+//   printf0("r_k and V_k computed\n");
+  
+    
+//     fop = fopen("Vmx.m","w");
+//   fprintf(fop,"Vm = [");
+//   for ( int i = 0; i<m; i++ ) {
+//     trans_back_PRECISION( (complex_double*) d->W[i], (complex_PRECISION*) d->V[i], l->s_PRECISION.op.translation_table, l, threading );
+//     for ( int j = 0; j<l->inner_vector_size; j++ )
+//       fprintf(fop,"%+.16lf%+.16lfi ", CSPLIT(d->W[i][j]));
+//     fprintf(fop,";\n");
+//   }
+//   fprintf(fop,"];\n");
+//   fprintf(fop,"Vm=Vm.';\n");
+//   fclose(fop);
+//   printf0("Vm");
+//   getchar();
+  
+  
     if( g.davidson_setup==2 ) extend_subspace_on_D_PRECISION( &(d->V[m]), 1, d, l, threading );
     else extend_subspace_PRECISION( &(d->V[m]), 1, d, l, threading );
   }
@@ -797,14 +776,35 @@ void davidson_step_PRECISION( int steps, davidson_setup_PRECISION_struct *d, lev
 //   fop = fopen("V1x.m","w");
 //   fprintf(fop,"V1 = [");
 //   for ( int i = 0; i<l->num_eig_vect; i++ ) {
-//     trans_back_PRECISION( d->W[i], d->V[i], l->s_PRECISION.op.translation_table, l, threading );
+//     trans_back_PRECISION( (complex_double*) d->W[i], (complex_PRECISION*) d->V[i], l->s_PRECISION.op.translation_table, l, threading );
 //     for ( int j = 0; j<l->inner_vector_size; j++ )
 //       fprintf(fop,"%+.16lf%+.16lfi ", CSPLIT(d->W[i][j]));
 //     fprintf(fop,";\n");
 //   }
 //   fprintf(fop,"];\n");
 //   fprintf(fop,"V1=V1.';\n");
+//   printf0("\nV20\n");
 //   fclose(fop);
+//   
+//   fop = fopen("H1H2.m","w");
+//   fprintf(fop,"H1 = [\n");
+//   for( int i = 0; i<m+1; i++ ) {
+//     for( int j = 0; j<m+1; j++ ) {
+//       fprintf(fop,"%+.14lf%+.14lfi ", CSPLIT(d->H1[i][j]));
+//     }
+//     fprintf(fop,";\n");
+//   }
+//   fprintf(fop,"];\n");
+//   fprintf(fop,"H2 = [\n");
+//   for( int i = 0; i<m+1; i++ ) {
+//     for( int j = 0; j<m+1; j++ ) {
+//       fprintf(fop,"%+.14lf%+.14lfi ", CSPLIT(d->H2[i][j]));
+//     }
+//     fprintf(fop,";\n");
+//   }
+//   fprintf(fop,"];\n");
+//   fclose(fop);
+//   getchar();
   
 }
 
@@ -814,8 +814,7 @@ void restart_subspace_PRECISION( davidson_setup_PRECISION_struct *d, level_struc
   int n = d->size, m = MIN(l->num_eig_vect,d->size), vs = l->inner_vector_size;
   char N = 'N', C = 'C', T = 'T'; // GEMM: "nothing", "complex conjugate", "transpose"
   complex_PRECISION one = 1, zero = 0, *s = d->s, v[n*n], H1[m*m], H2[m*m];
-//   vector_PRECISION *V = d->V, *AV = d->AV, *W = d->W;
-  
+
 //   FILE *fop;
 //   fop = fopen("H1H2.m","w");
 //   fprintf(fop,"H1 = [\n");
@@ -834,56 +833,84 @@ void restart_subspace_PRECISION( davidson_setup_PRECISION_struct *d, level_struc
 //     fprintf(fop,";\n");
 //   }
 //   fprintf(fop,"];\n");
-//   fclose(fop);
-//   printf0("\nrestart begin\n");
-//   getchar();
   
   // get eigenvalues and orthogonalize eigenvectors
   dense_ev_PRECISION_driver( d->theta, v, d->H1, g.davidson_setup==2?NULL:d->H2, n ); // NOTE: Replace by zgges? (QZ algorithm)
+
+  complex_PRECISION phase;
+  for( int i=0; i<n; i++) {
+    phase = cabs(*(v+i*n))/(*(v+i*n));
+    for( int j=0; j<n; j++) {
+      *(v+i*n+j) *= phase;
+    }
+  }
+
   qr_PRECISION( s, v, n, n, d->maxsize );
+//   for (int i=0;i<n; i++) memcpy(s+i*d->maxsize, v+i*n, n*sizeof(complex_PRECISION));
   
-//   fprintf(fop,"VV=[\n");
-//   for (int i = 0; i<m; i++) {
-//     for (int j = 0; j<m; j++) {
+//     fprintf(fop,"VV=[\n");
+//   for (int i = 0; i<n; i++) {
+//     for (int j = 0; j<n; j++) {
 //       fprintf(fop,"%+.16lf%+.16lfi ", CSPLIT(*(s+i*d->maxsize+j)));
+// //       fprintf(fop,"%+.16lf%+.16lfi ", CSPLIT(*(v+i*n+j)));
 //     }
 //     fprintf(fop,";\n");
 //   }
 //   fprintf(fop,"];\n VV = VV.';\n");
 //   fprintf(fop,"theta = [\n");
-//   for (int i = 0; i<m; i++) {
+//   for (int i = 0; i<n; i++) {
 //     fprintf(fop,"%+.16lf%+.16lfi\n", CSPLIT(d->theta[i]));
 //   }
 //   fprintf(fop,"];\n");
 //   
-//   printf0("restart EV end\n");
+//   printf0("dense ev end\n");
 //   fclose(fop);
-//   getchar();
-
   
-  // rebuild V from smallest ritz values 
+//   printf0("restart s = \n");
+//   for (int i = 0; i<n; i++) {
+//     printf0("%+.15lf%+.15lfi\n", CSPLIT(s[i]));
+//   }
+//   getchar();
+    
+//   fop = fopen("V_restart.m","w");
+//   fprintf(fop,"Vprerestart = [");
+//   for ( int i = 0; i<n; i++ ) {
+//     trans_back_PRECISION( (complex_double*) d->W[i], (complex_PRECISION*) d->V[i], l->s_PRECISION.op.translation_table, l, threading );
+//     for ( int j = 0; j<vs; j++ )
+//       fprintf(fop,"%+.16lf%+.16lfi ", CSPLIT(d->W[i][j]));
+//     fprintf(fop,";\n");
+//   }
+//   fprintf(fop,"];\n");
+//   fprintf(fop,"Vprerestart=Vprerestart.';\n");
+
+  // rebuild V from smallest ritz vectors 
   for ( int i=0; i<m; i++ ) {
     vector_PRECISION_define( d->W[i], 0, 0, vs, l );
-    vector_PRECISION_multi_saxpy( d->W[i], d->V, s+i*d->maxsize, 1, m, 0, vs, l );
+    vector_PRECISION_multi_saxpy( d->W[i], d->V, s+i*d->maxsize, 1, n, 0, vs, l );
   }
 
-  // rebuild AV from smallest ritz values 
+  // rebuild AV from smallest ritz vectors 
   for ( int i=0; i<m; i++ ) {
     vector_PRECISION_copy( d->V[i], d->W[i], 0, vs, l );
     vector_PRECISION_define( d->W[i], 0, 0, vs, l );
-    vector_PRECISION_multi_saxpy( d->W[i], d->AV, s+i*d->maxsize, 1, m, 0, vs, l );
+    vector_PRECISION_multi_saxpy( d->W[i], d->AV, s+i*d->maxsize, 1, n, 0, vs, l );
   }
   for ( int i=0; i<m; i++ ) {
     vector_PRECISION_copy( d->AV[i], d->W[i], 0, vs, l );
   }
-//   printf0("V\n");
-//   for( int j = 0; j<5; j++ ) {
-//     printf0("%+.8lf%+.8lfi ", CSPLIT(V[0][j]));
+  
+//     fprintf(fop,"Vpostrestart = [");
+//   for ( int i = 0; i<m; i++ ) {
+//     trans_back_PRECISION( (complex_double*) d->W[i], (complex_PRECISION*) d->V[i], l->s_PRECISION.op.translation_table, l, threading );
+//     for ( int j = 0; j<vs; j++ )
+//       fprintf(fop,"%+.16lf%+.16lfi ", CSPLIT(d->W[i][j]));
+//     fprintf(fop,";\n");
 //   }
-//   printf0("\n");
+//   fprintf(fop,"];\n");
+//     fprintf(fop,"Vpostrestart=Vpostrestart.';\n");
+//   fclose(fop);
+//   printf0("\nVrestart end\n");
 //   getchar();
-//   gram_schmidt_PRECISION( d->V, v, 0, m, l, threading );
-//   test_eigenspace_PRECISION( d, l, threading );
   
   // update H1 and H2
   gemm_PRECISION( &C, &T, &m, &n, &n, &one, s, &(d->maxsize), d->H1[0], &(d->maxsize), &zero, v, &n ); // v <- s* H1
@@ -896,55 +923,6 @@ void restart_subspace_PRECISION( davidson_setup_PRECISION_struct *d, level_struc
       d->H2[j][i] = H2[j+m*i];
     }
   }
-  
-//     FILE *fop;
-//   printf0("vs=%d\n",vs);
-//   fop = fopen("Vrestart.m","w");
-//   fprintf(fop,"V_restart = [");
-//   for ( int i = 0; i<20; i++ ) {
-//     trans_back_PRECISION( d->V[20+i], d->V[i], l->s_PRECISION.op.translation_table, l, threading );
-//     for ( int j = 0; j<vs; j++ )
-//       fprintf(fop,"%+.16lf%+.16lfi ", CSPLIT(d->V[20+i][j]));
-//     fprintf(fop,";\n");
-//   }
-//   fprintf(fop,"];\n");
-//   fprintf(fop,"V_restart=V_restart.';\n");
-//   
-//   fprintf(fop,"AV_restart = [");
-//   for ( int i = 0; i<20; i++ ) {
-//     trans_back_PRECISION( d->AV[20+i], d->AV[i], l->s_PRECISION.op.translation_table, l, threading );
-//     for ( int j = 0; j<vs; j++ )
-//       fprintf(fop,"%+.16lf%+.16lfi ", CSPLIT(d->AV[20+i][j]));
-//     fprintf(fop,";\n");
-//   }
-//   fprintf(fop,"];\n");
-//   fprintf(fop,"AV_restart=AV_restart.';\n");
-//   fclose(fop);
-  
-//   FILE *fop;
-//   fop = fopen("H1H2.m","w");
-//   fprintf(fop,"H1 = [\n");
-//   for( int i = 0; i<m; i++ ) {
-//     for( int j = 0; j<m; j++ ) {
-//       fprintf(fop,"%+.14lf%+.14lfi ", CSPLIT(d->H1[i][j]));
-//     }
-//     fprintf(fop,";\n");
-//   }
-//   fprintf(fop,"];\n");
-//   fprintf(fop,"H2 = [\n");
-//   for( int i = 0; i<m; i++ ) {
-//     for( int j = 0; j<m; j++ ) {
-//       fprintf(fop,"%+.14lf%+.14lfi ", CSPLIT(d->H2[i][j]));
-//     }
-//     fprintf(fop,";\n");
-//   }
-//   fprintf(fop,"];\n");
-//   fclose(fop);
-//   printf0("done\n");
-//   getchar();
-//   complex_PRECISION buffer[m];
-//   gram_schmidt_PRECISION( d->V, buffer, 0, m, l, threading );
-
   d->size = m;
 }
 
@@ -952,11 +930,21 @@ void restart_subspace_PRECISION( davidson_setup_PRECISION_struct *d, level_struc
 void initial_davidson_setup_PRECISION( int setup_iter, davidson_setup_PRECISION_struct *d, level_struct *l, Thread *threading ) {
   
   int vs = l->inner_vector_size, nev = l->num_eig_vect;
+//   FILE *fop;
   
+  vector_PRECISION_define_random( d->V[0], 0, vs, l );
 //   vector_PRECISION_define( d->V[0], 1, 0, vs, l );
-  vector_PRECISION_define( d->V[0], 0, 0, vs, l );
-  if (g.my_rank == 0) vector_PRECISION_define( d->V[0], 1, 0, 1, l );
-  setup_iter = 2;
+//   fop = fopen("V0_rnd.m","w");
+//   fprintf(fop,"V0rnd = [");
+//   trans_back_PRECISION( (complex_double*) d->W[0], (complex_PRECISION*) d->V[0], l->s_PRECISION.op.translation_table, l, threading );
+//   for ( int j = 0; j<vs; j++ )
+//     fprintf(fop,"%+.16lf%+.16lfi ", CSPLIT(d->W[0][j]));
+//   fprintf(fop,";\n");
+//   fprintf(fop,"];\n");
+//   fprintf(fop,"V0rnd=V0rnd.';\n");
+//   fclose(fop);
+
+  setup_iter = 1;
   
   if( g.davidson_setup==2 )
     extend_subspace_on_D_PRECISION( &(d->V[0]), 1, d, l, threading );
@@ -965,98 +953,26 @@ void initial_davidson_setup_PRECISION( int setup_iter, davidson_setup_PRECISION_
   
   for( int k = 0; k<setup_iter; k++ ) {
     davidson_step_PRECISION( k==0?nev-1:nev, d, l, threading );
-//     for( int i = 0; i<nev*setup_iter; i++ ) {
-//       vector_PRECISION_define_random(l->d_PRECISION.V[i], 0, l->inner_vector_size, l );
-//     }
     restart_subspace_PRECISION( d, l, threading );
     printf0("Level: %d -- Initial Setup Step %d/%d finished\n", l->level, k+1, setup_iter );
   }
-//     restart_subspace_PRECISION( d, l, threading );
-  
-//   complex_PRECISION buffer[2*nev];
-//   gram_schmidt_PRECISION( d->V, buffer, 0, nev, l, threading );
     
   for( int j = 0; j<nev; j++ ) {
     if( creal(d->V[j][0]) < 0 )
       vector_PRECISION_scale( d->V[j], d->V[j], -1, 0, l->inner_vector_size, l );
   }
-  
-  printf0("V_init\n");
-  for( int i = 0; i<1; i++ ) {
-    for( int j = 0; j<5; j++ ) {
-      printf0("%+.16lf%+.16lfi ", CSPLIT(d->V[i][j]));
-    }
-    printf0("\n");
-  }
-//   getchar();
-
   define_next_level_PRECISION( d, l, threading );
-//   test_eigenspace_PRECISION( d, l, threading );
-//   {
-//       int ivs = l->next_level->inner_vector_size, vs = l->next_level->vector_size, bvs = l->inner_vector_size;
-//     double tmp;
-//     vector_PRECISION ee = NULL, v = NULL;
-//     
-//     MALLOC( ee, complex_PRECISION, bvs );
-//     MALLOC( v, complex_PRECISION, vs );
-//     vector_PRECISION_define( ee, 1, 0, bvs, l );
-//     vector_PRECISION_define( v, 0, 0, vs, l );
-    
-//     restrict_PRECISION( v, ee, l, threading );
-//     tmp = global_norm_PRECISION( v, 0, ivs, l->next_level, threading );
-//     printf0("\nnorm restriction on ones after init: %+.14lf\n", tmp);
-//     for (int i=0; i<5; i++)
-//       printf0("%+.16lf%+.16lfi ",CSPLIT(v[i]));
-//     getchar();
-//     FREE( ee, complex_PRECISION, bvs );
-//     FREE( v, complex_PRECISION, vs );
-//   }
-  // print results in MATLAB format  
-//     FILE *fop;
-//     
-//   fop = fopen("V_init.m","w");
-//   fprintf(fop,"Vinit = [");
-//   for ( int i = 0; i<nev*setup_iter; i++ ) {
-//     trans_back_PRECISION( d->W[i], d->V[i], l->s_PRECISION.op.translation_table, l, threading );
-//     for ( int j = 0; j<vs; j++ )
-//       fprintf(fop,"%+.16lf%+.16lfi ", CSPLIT(d->W[i][j]));
-//     fprintf(fop,";\n");
-//   }
-//   fprintf(fop,"];\n");
-//   fprintf(fop,"Vinit=Vinit.';\n");
-//   fclose(fop);
-//     getchar();
-  
-  
-  // print results in MATLAB format
-//   FILE *fop;
-  
-  
-  
-//   fop = fopen("P_init.m","w");
-//   fprintf(fop,"Pinit = [");
-//   for ( int i = 0; i<nev; i++ ) {
-//     trans_back_PRECISION( d->W[i], l->is_PRECISION.interpolation[i], l->s_PRECISION.op.translation_table, l, threading );
-//     for ( int j = 0; j<vs; j++ )
-//       fprintf(fop,"%+.14lf%+.14lfi ", CSPLIT(d->W[i][j]));
-//     fprintf(fop,";\n");
-//   }
-//   fprintf(fop,"];\n");
-//   fprintf(fop,"Pinit=Pinit.';\n");
-//   fclose(fop);
-//     getchar();
-
 }
 
 
 void hierarchy_update_PRECISION( vector_PRECISION *V, davidson_setup_PRECISION_struct *d, level_struct *l, Thread *threading ) {
-  
+
   if( g.davidson_setup==2 ) 
     extend_subspace_on_D_PRECISION( V, d->size, d, l, threading );
   else
     extend_subspace_PRECISION( V, d->size, d, l, threading );
-  
   restart_subspace_PRECISION( d, l, threading );
+  
   define_next_level_PRECISION( d, l, threading );
   re_setup_PRECISION( l, threading );
   if( l->next_level->level > 0 ) {
@@ -1065,7 +981,7 @@ void hierarchy_update_PRECISION( vector_PRECISION *V, davidson_setup_PRECISION_s
     l->next_level->d_PRECISION.size = d->size;
     hierarchy_update_PRECISION( l->next_level->d_PRECISION.V, &(l->next_level->d_PRECISION), l->next_level, threading );
   }
-  test_eigenspace_PRECISION( d, l, threading );
+//   test_eigenspace_PRECISION( d, l, threading );
 }
 
 
@@ -1077,47 +993,6 @@ void iterative_davidson_setup_PRECISION( int iterative_iter, level_struct *l, Th
   
   for( int i = 0; i < iterative_iter; i++ ) {
     davidson_step_PRECISION( nev, &(l->d_PRECISION), l, threading );
-//     for( int i = 0; i<nev; i++ ) {
-//       vector_PRECISION_define_random(l->d_PRECISION.V[i], 0, l->inner_vector_size, l );
-//     }
   hierarchy_update_PRECISION( NULL, &(l->d_PRECISION), l, threading );
-    
-//   FILE *fop;
-//     
-//   fop = fopen("V_iter.m","w");
-//   fprintf(fop,"Viter = [");
-//   for ( int i = 0; i<nev; i++ ) {
-//     trans_back_PRECISION( l->d_PRECISION.W[i], l->d_PRECISION.V[i], l->s_PRECISION.op.translation_table, l, threading );
-//     for ( int j = 0; j<l->inner_vector_size; j++ )
-//       fprintf(fop,"%+.16lf%+.16lfi ", CSPLIT(l->d_PRECISION.W[i][j]));
-//     fprintf(fop,";\n");
-//   }
-//   fprintf(fop,"];\n");
-//   fprintf(fop,"Viter=Viter.';\n");
-//   fclose(fop);
-//     
-//   fop = fopen("P_iter.m","w");
-//   fprintf(fop,"Piter = [");
-
-//   for ( int i = 0; i<nev; i++ ) {
-//     trans_back_PRECISION( l->d_PRECISION.W[i], l->is_PRECISION.interpolation[i], l->s_PRECISION.op.translation_table, l, threading );
-//     for ( int j = 0; j<l->inner_vector_size; j++ )
-//       fprintf(fop,"%+.14lf%+.14lfi ", CSPLIT(l->d_PRECISION.W[i][j]));
-//     fprintf(fop,";\n");
-//   }
-//   fprintf(fop,"];\n");
-//   fprintf(fop,"Piter=Piter.';\n");
-//   fclose(fop);
-//     printf0("V_iter\n");
-//     for( int i = 0; i<1; i++ ) {
-//       for( int j = 0; j<5; j++ ) {
-//         printf0("%+.16lf%+.16lfi ", CSPLIT(l->d_PRECISION.V[i][j]));
-//       }
-//       printf0("\n");
-//     }
-//     getchar();
-//     if( l->next_level->level > 0 )
-//       iterative_davidson_setup_PRECISION( iterative_iter, l->next_level, threading );
-//     printf0("Level: %d -- Iterative Setup Step %d/%d finished\n", l->level, i+1, iterative_iter);
   }
 }

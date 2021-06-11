@@ -433,6 +433,75 @@ void gram_schmidt_on_aggregates_PRECISION( vector_PRECISION *V, const int num_ve
 }
 
 
+#define lacpy_float clacpy_
+#define lacpy_double zlacpy_
+#define geqrf_float cgeqrf_
+#define geqrf_double zgeqrf_
+#define ungqr_float cungqr_
+#define ungqr_double zungqr_
+extern void lacpy_PRECISION( char *uplo, int *m, int *n, complex_PRECISION *A, int *lda, complex_PRECISION *B, int *ldb );   // matrix copy
+extern void geqrf_PRECISION( int *m, int *n, complex_PRECISION *A, int *lda, complex_PRECISION *tau,  // computes HH reflectors and R for a QR decomposition
+                              complex_PRECISION *work, int *lwork, int *info );
+extern void ungqr_PRECISION( int *m, int *n, int *k, complex_PRECISION *A, int *lda, complex_PRECISION *tau,                 // recover Q from HH reflectors
+                              complex_PRECISION *work, int *lwork, int *info );
+
+void householder_qr_on_aggregates_PRECISION( vector_PRECISION *V, int num_vect, level_struct *l, struct Thread *threading ) {
+  
+  PROF_PRECISION_START( _GRAM_SCHMIDT_ON_AGGREGATES, threading );
+  
+  int ivs = l->inner_vector_size, num_aggregates = l->s_PRECISION.num_aggregates, aggregate_size = ivs / num_aggregates, aggregate_size2 = aggregate_size/2, spin_vars = l->num_lattice_site_var/2, num_lattice_sites = aggregate_size/l->num_lattice_site_var, tau_size = MIN(num_vect, aggregate_size2), lwork = SQUARE(MAX(num_vect, aggregate_size2)), info;
+  
+  complex_PRECISION *aggr01 = NULL, *aggr23 = NULL, *tau = NULL, *work = NULL;
+  
+  MALLOC( aggr01, complex_PRECISION, aggregate_size*num_vect/2 );
+  MALLOC( aggr23, complex_PRECISION, aggregate_size*num_vect/2 );
+  MALLOC( tau, complex_PRECISION, tau_size );
+  MALLOC( work, complex_PRECISION, lwork );
+  
+  for ( int k=0; k<num_aggregates; k++ ) {
+    // separate spins for every aggregate and store columnwise for LAPACK
+    for ( int i=0; i<num_vect; i++) {
+      for ( int j=0; j<num_lattice_sites; j++) {
+        for ( int kk=0; kk<spin_vars; kk++ ) {
+          aggr01[i*aggregate_size2+j*spin_vars+kk] = V[i][k*aggregate_size+j*l->num_lattice_site_var+kk];
+        }
+        for ( int kk=spin_vars; kk<2*spin_vars; kk++) {
+          aggr23[i*aggregate_size2+j*spin_vars+kk-spin_vars] = V[i][k*aggregate_size+j*l->num_lattice_site_var+kk];
+        }
+      }
+    }
+//     getchar();
+    
+    // householder on first half
+    geqrf_PRECISION( &aggregate_size2, &num_vect, aggr01, &aggregate_size2, tau, work, &lwork, &info );
+    ungqr_PRECISION( &aggregate_size2, &num_vect, &tau_size, aggr01, &aggregate_size2, tau, work, &lwork, &info );
+
+    // householder on second half
+    geqrf_PRECISION( &aggregate_size2, &num_vect, aggr23, &aggregate_size2, tau, work, &lwork, &info );
+    ungqr_PRECISION( &aggregate_size2, &num_vect, &tau_size, aggr23, &aggregate_size2, tau, work, &lwork, &info );
+
+    // copy orthogonal aggregates back into V
+    for ( int i=0; i<num_vect; i++) {
+      for ( int j=0; j<num_lattice_sites; j++) {
+        for ( int kk=0; kk<spin_vars; kk++ ) {
+          V[i][k*aggregate_size+j*l->num_lattice_site_var+kk] = aggr01[i*aggregate_size2+j*spin_vars+kk];
+        }
+        for ( int kk=spin_vars; kk<2*spin_vars; kk++) {
+          V[i][k*aggregate_size+j*l->num_lattice_site_var+kk] = aggr23[i*aggregate_size2+j*spin_vars+kk-spin_vars];
+        }
+      }
+    }
+  }
+  
+  FREE( aggr01, complex_PRECISION, aggregate_size*num_vect/2 );
+  FREE( aggr23, complex_PRECISION, aggregate_size*num_vect/2 );
+  FREE( tau, complex_PRECISION, tau_size );
+  FREE( work, complex_PRECISION, lwork );
+  
+  PROF_PRECISION_STOP( _GRAM_SCHMIDT_ON_AGGREGATES, 1, threading );
+}
+
+
 void spinwise_PRECISION_skalarmultiply( vector_PRECISION eta1, vector_PRECISION eta2, vector_PRECISION phi, complex_PRECISION alpha,
                                         int start, int end, level_struct *l ) {
   

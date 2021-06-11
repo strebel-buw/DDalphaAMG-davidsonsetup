@@ -120,6 +120,8 @@
   
   void gram_schmidt_on_aggregates_PRECISION( vector_PRECISION *V, const int num_vec, level_struct *l, struct Thread *threading );
   
+  void householder_qr_on_aggregates_PRECISION( vector_PRECISION *V, int num_vec, level_struct *l, struct Thread *threading );
+  
   // Gram-Schmidt on a block of vectors, used by Block-Gram-Schmidt
   void aggregate_gram_schmidt_block_PRECISION( PRECISION *V,
       int num_vec, int leading_dimension, level_struct *l, struct Thread *threading );
