@@ -433,18 +433,6 @@ void gram_schmidt_on_aggregates_PRECISION( vector_PRECISION *V, const int num_ve
 }
 
 
-#define lacpy_float clacpy_
-#define lacpy_double zlacpy_
-#define geqrf_float cgeqrf_
-#define geqrf_double zgeqrf_
-#define ungqr_float cungqr_
-#define ungqr_double zungqr_
-extern void lacpy_PRECISION( char *uplo, int *m, int *n, complex_PRECISION *A, int *lda, complex_PRECISION *B, int *ldb );   // matrix copy
-extern void geqrf_PRECISION( int *m, int *n, complex_PRECISION *A, int *lda, complex_PRECISION *tau,  // computes HH reflectors and R for a QR decomposition
-                              complex_PRECISION *work, int *lwork, int *info );
-extern void ungqr_PRECISION( int *m, int *n, int *k, complex_PRECISION *A, int *lda, complex_PRECISION *tau,                 // recover Q from HH reflectors
-                              complex_PRECISION *work, int *lwork, int *info );
-
 void householder_qr_on_aggregates_PRECISION( vector_PRECISION *V, int num_vect, level_struct *l, struct Thread *threading ) {
   
   PROF_PRECISION_START( _GRAM_SCHMIDT_ON_AGGREGATES, threading );
@@ -470,7 +458,6 @@ void householder_qr_on_aggregates_PRECISION( vector_PRECISION *V, int num_vect, 
         }
       }
     }
-//     getchar();
     
     // householder on first half
     geqrf_PRECISION( &aggregate_size2, &num_vect, aggr01, &aggregate_size2, tau, work, &lwork, &info );

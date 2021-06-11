@@ -337,7 +337,6 @@ int fgmres_PRECISION( gmres_PRECISION_struct *p, level_struct *l, struct Thread 
           START_MASTER(threading)
           if ( p->print && g.print > 0 )
             printf0("| approx. rel. res. after  %-6d iterations: %e |\n", iter, gamma_jp1/norm_r0 );
-//           if (l->depth==0) printf0("P->V: %lf+%lfi %lf+%lfi \n", CSPLIT(p->V[0][0]), CSPLIT(p->V[0][1]));
           END_MASTER(threading)
         }
 #endif
@@ -844,26 +843,6 @@ int arnoldi_step_PRECISION( vector_PRECISION *V, vector_PRECISION *Z, vector_PRE
           // obtains w = D * Z[j] from Schwarz
         } else {
           prec( Z[j], NULL, V[j], _NO_RES, l, threading );
-//           double norm;
-//           if (l->depth==0) {
-//             norm = global_norm_PRECISION( Z[j], start, end, l, threading ); 
-//             printf0("Z_j: %lf\n", norm);
-//           }
-//           vector_PRECISION ones=NULL;
-//           MALLOC(ones, complex_PRECISION, end-start);
-//           vector_PRECISION_define( ones, 1, start, end, l);
-//           vcycle_PRECISION( Z[j+1], NULL, ones, _NO_RES, l, threading );
-//           if (l->depth==0) {
-//             norm = global_norm_PRECISION( Z[j+1], start, end, l, threading ); 
-//             printf0("vcycle: %.14lf\n", norm);
-//           }
-//           prec( Z[j+1], NULL, ones, _NO_RES, l, threading );
-//           if (l->depth==0) {
-//             norm = global_norm_PRECISION( Z[j+1], start, end, l, threading ); 
-//             printf0("prec: %.14lf\n", norm);
-//           }
-//           FREE(ones, complex_PRECISION, end-start);
-
           apply_operator_PRECISION( w, Z[j], p, l, threading ); // w = D*Z[j]
         }
         if ( shift ) vector_PRECISION_saxpy( w, w, Z[j], shift, start, end, l );

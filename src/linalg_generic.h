@@ -21,6 +21,19 @@
 
 #ifndef LINALG_PRECISION_HEADER
   #define LINALG_PRECISION_HEADER
+
+#define lacpy_float clacpy_
+#define lacpy_double zlacpy_
+#define geqrf_float cgeqrf_
+#define geqrf_double zgeqrf_
+#define ungqr_float cungqr_
+#define ungqr_double zungqr_
+extern void lacpy_PRECISION( char *uplo, int *m, int *n, complex_PRECISION *A, int *lda, complex_PRECISION *B, int *ldb );   // matrix copy
+extern void geqrf_PRECISION( int *m, int *n, complex_PRECISION *A, int *lda, complex_PRECISION *tau,  // computes HH reflectors and R for a QR decomposition
+                              complex_PRECISION *work, int *lwork, int *info );
+extern void ungqr_PRECISION( int *m, int *n, int *k, complex_PRECISION *A, int *lda, complex_PRECISION *tau,                 // recover Q from HH reflectors
+                              complex_PRECISION *work, int *lwork, int *info );  
+  
   
 #ifdef _M10TV
   #define VECTOR_FOR( start, end, expression, update, l ) do{ \

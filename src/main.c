@@ -102,74 +102,13 @@ int main( int argc, char **argv ) {
     setup_threading(&threading, commonthreaddata, &l);
     setup_no_threading(no_threading, &l);
     
-    g.setup = 1;
     // setup up initial MG hierarchy
     method_setup( NULL, &l, &threading );
     
     // iterative phase
     method_update( l.setup_iter, &l, &threading );
     
-//     int vs = l.inner_vector_size;
-//     double tmp;
-//     vector_double e = NULL, v = NULL;
-//     
-//     MALLOC( e, complex_double, vs );
-//     MALLOC( v, complex_double, vs );
-    
-//     printf0("%d\n", l.inner_vector_size);
-//     vector_double_define( e, 1, 0, vs, &l );
-//     vector_double_define( v, 0, 0, vs, &l );
-    
-//     vector_double_multi_saxpy(v, l.is_double.test_vector, e, 1, 20, 0, vs, &l );
-//     printf0("vcycle applied to ones\n");
-//     for( int j = 0; j<k; j++ ) {
-//       printf0("%+.8lf%+.8lfi ", CSPLIT(v[j]));
-//     }
-//     tmp = global_norm_double(v, 0, vs, &l, &threading );
-//     printf0("\nnorm V times ones: %lf\n", tmp);
-  
-//     vcycle_double(v, NULL, e, _NO_RES, &l, &threading );
-//     printf0("vcycle applied to ones\n");
-//     for( int j = 0; j<k; j++ ) {
-//       printf0("%+.8lf%+.8lfi ", CSPLIT(v[j]));
-//     }
-//     tmp = global_norm_double(v, 0, vs, &l, &threading );
-//     printf0("\nnorm vcycle on ones: %lf\n", tmp);
-//     
-//     smoother_double(v, NULL, e, 4, _NO_RES, 0, &l, &threading );
-//     printf0("smoother applied to ones\n");
-//     for( int j = 0; j<k; j++ ) {
-//       printf0("%+.8lf%+.8lfi ", CSPLIT(v[j]));
-//     }
-//     tmp = global_norm_double(v, 0, vs, &l, &threading );
-//     printf0("\nnorm smoother on ones: %lf\n", tmp);
-    
-//     printf0("P\n");
-//     for( int i = 0; i<4; i++ ) {
-//       for( int j = 0; j<6; j++ ) {
-//         printf0("%+.14lf%+.14lfi ", CSPLIT(l.is_double.interpolation[i][j]));
-//       }
-//       printf0("\n");
-//     }
-//     getchar();
-    
-    
-//     FREE( e, complex_double, vs );
-//     FREE( v, complex_double, vs );
-//     getchar();
-//   int nev = l.num_eig_vect;
-//   FILE *fop;
-//   fop = fopen("Opx.m","w");
-//   fprintf(fop,"Op = [");
-//   for ( int i = 0; i<nev; i++ ) {
-//     for ( int j = 0; j<vs; j++ )
-//       fprintf(fop,"%+.14lf%+.14lfi ", CSPLIT(l.is_double.operator[i*vs+j]));
-//     fprintf(fop,";\n");
-//   }
-//   fprintf(fop,"];\n");
-//   fprintf(fop,"Op=Op.';\n");
-//   fclose(fop);
-    
+    // solve phase
     solve_driver( &l, &threading );
   }
   

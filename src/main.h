@@ -367,7 +367,7 @@
         method, odd_even, anti_pbc, rhs, propagator_coords[4],
         interpolation, randomize, *num_eig_vect, num_coarse_eig_vect, kcycle, mixed_precision,
         restart, max_restart, kcycle_restart, kcycle_max_restart, coarse_iter, coarse_restart,
-        davidson_setup, setup;
+        davidson_setup;
     double tol, coarse_tol, kcycle_tol, csw, rho, *relax_fac;
 
     // profiling, analysis, output
@@ -388,8 +388,7 @@
     struct dd_alpha_amg_parameters amg_params;
     struct dd_alpha_amg_setup_status mg_setup_status;
     double mass_for_next_solve;
-    
-    int test;
+
   } global_struct;
 
   extern global_struct g;
