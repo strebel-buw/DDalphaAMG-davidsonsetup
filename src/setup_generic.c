@@ -521,7 +521,7 @@ void testvector_analysis_PRECISION( vector_PRECISION *test_vectors, level_struct
 
 void iterative_PRECISION_setup( int setup_iter, level_struct *l, struct Thread *threading ) {
   if ( l->depth == 0 ) {
-    int ivs = l->next_level->inner_vector_size, vs = l->next_level->vector_size, bvs = l->inner_vector_size;
+//     int ivs = l->next_level->inner_vector_size, vs = l->next_level->vector_size, bvs = l->inner_vector_size;
 //     double tmp;
 //     vector_PRECISION ee = NULL, v = NULL;
     

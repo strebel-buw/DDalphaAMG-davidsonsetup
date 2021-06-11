@@ -90,9 +90,7 @@ void smoother_PRECISION( vector_PRECISION phi, vector_PRECISION Dphi, vector_PRE
 
 void vcycle_PRECISION( vector_PRECISION phi, vector_PRECISION Dphi, vector_PRECISION eta,
                        int res, level_struct *l, struct Thread *threading ) {
-  
 
-  
   if ( g.interpolation && l->level>0 ) {
     for ( int i=0; i<l->n_cy; i++ ) {
       if ( i==0 && res == _NO_RES ) {
@@ -123,25 +121,37 @@ void vcycle_PRECISION( vector_PRECISION phi, vector_PRECISION Dphi, vector_PRECI
             }
           } else {
             
-    int ivs = l->next_level->inner_vector_size, vs = l->next_level->vector_size, bvs = l->inner_vector_size;
-    double tmp;
-    vector_PRECISION ee = NULL, e = NULL, v = NULL, vv = NULL;
-// //     
+//     int ivs = l->next_level->inner_vector_size, vs = l->next_level->vector_size, bvs = l->inner_vector_size;
+//     double tmp;
+//     vector_PRECISION ee = NULL, e = NULL, v = NULL, vv = NULL;
+//     
 //     MALLOC( e, complex_PRECISION, vs );
 //     MALLOC( ee, complex_PRECISION, bvs );
 //     MALLOC( v, complex_PRECISION, vs );
 //     MALLOC( vv, complex_PRECISION, bvs );
 //     
 //     printf0("Inner Vectorsize = %d, Vectorsize = %d, Big Inner Vectorsize = %d\n", ivs, vs, bvs);
-//     vector_PRECISION_define_random( e, 0, vs, l );
+//     vector_PRECISION_define( e, 1, 0, vs, l );
 //     vector_PRECISION_define( v, 0, 0, vs, l );
 //     vector_PRECISION_define_random( ee, 0, bvs, l );
-//     vector_PRECISION_define( vv, 0, 0, bvs, l );
+//     vector_PRECISION_define( vv, 1, 0, bvs, l );
 // 
-// //
-//     tmp = global_norm_PRECISION( e, 0, ivs, l->next_level, threading );
-//     printf0("\nnorm v: %+.14lf\n", tmp);
-    
+//     interpolate3_PRECISION( ee, e, l, threading );
+//     restrict_PRECISION( v, ee, l, threading );
+//     tmp = global_norm_PRECISION( ee, 0, bvs, l, threading );
+//     printf0("\nnorm P*P ones: %+.14lf\n", tmp);
+//     for( int j = 0; j<5; j++ ) {
+//       printf0("%+.14lf%+.14lfi ", CSPLIT(v[j]));
+//     }
+//     
+//     restrict_PRECISION( v, vv, l, threading );
+//     interpolate3_PRECISION( ee, v, l, threading );
+//     tmp = global_norm_PRECISION( ee, 0, bvs, l, threading );
+//     printf0("\nnorm PP* ones: %+.14lf\n", tmp);
+//     for( int j = 0; j<5; j++ ) {
+//       printf0("%+.14lf%+.14lfi ", CSPLIT(ee[j]));
+//     }
+//     getchar();
 //     interpolate3_PRECISION( vv, e, l, threading );
 //     tmp = global_norm_PRECISION( vv, 0, bvs, l, threading );
 //     printf0("\nnorm interpolation3 on ones: %+.14lf\n", tmp);
@@ -155,15 +165,14 @@ void vcycle_PRECISION( vector_PRECISION phi, vector_PRECISION Dphi, vector_PRECI
 //       l->next_level->p_PRECISION.b = e;
 //       fgmres_PRECISION( &(l->next_level->p_PRECISION), l->next_level, threading );
 //       l->next_level->p_PRECISION.b = bufx;
-//       printf0("coarse fgmres applied to ones: ");
+//       printf0("coarse solve on ones: \n");
 //     for( int j = 0; j<5; j++ ) {
-//       printf0("%+.14lf%+.14lfi ", CSPLIT(v[j]));
-// //     }
-//       tmp = global_norm_PRECISION( l->next_level->p_PRECISION.x, 0, ivs, l->next_level, threading );
-//       printf0("%+.14lf; \n", tmp);
+//       printf0("%+.14lf%+.14lfi ", CSPLIT(l->next_level->p_PRECISION.x[j]));
 //     }
+//       tmp = global_norm_PRECISION( l->next_level->p_PRECISION.x, 0, ivs, l->next_level, threading );
+//       printf0("\n norm = %+.14lf; \n", tmp);
 //     printf0("];");
-//       getchar();
+// //       getchar();
 //     FREE( e, complex_PRECISION, vs );
 //     FREE( ee, complex_PRECISION, bvs );
 //     FREE( v, complex_PRECISION, vs );
