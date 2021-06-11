@@ -44,7 +44,7 @@ void coarse_grid_correction_PRECISION_setup( level_struct *l, struct Thread *thr
       } else {
         operator_PRECISION_alloc( &(l->next_level->s_PRECISION.op), _ORDINARY, l->next_level );
         operator_PRECISION_define( &(l->next_level->s_PRECISION.op), l->next_level );
-        if( g.davidson_setup ) davidson_setup_PRECISION_struct_alloc( 1, 5*l->next_level->num_eig_vect, 1E-3, &(l->next_level->d_PRECISION), l->next_level );
+        if( g.davidson_setup ) davidson_setup_PRECISION_struct_alloc( 1, 5*l->next_level->num_eig_vect, 1E-1, &(l->next_level->d_PRECISION), l->next_level );
         interpolation_PRECISION_alloc( l->next_level );
       }
     } else {
@@ -82,7 +82,7 @@ void coarse_grid_correction_PRECISION_setup( level_struct *l, struct Thread *thr
     next_level_setup( NULL, l->next_level, threading );
     START_LOCKED_MASTER(threading)
     if ( !l->next_level->idle ) {
-      if( g.davidson_setup ) davidson_setup_PRECISION_struct_alloc( 1, 5*l->next_level->num_eig_vect, 1E-4, &(l->next_level->d_PRECISION), l->next_level );
+      if( g.davidson_setup ) davidson_setup_PRECISION_struct_alloc( 1, 5*l->next_level->num_eig_vect, 1E-1, &(l->next_level->d_PRECISION), l->next_level );
       interpolation_PRECISION_alloc( l->next_level );
     }
     END_LOCKED_MASTER(threading)
@@ -521,21 +521,6 @@ void testvector_analysis_PRECISION( vector_PRECISION *test_vectors, level_struct
 
 void iterative_PRECISION_setup( int setup_iter, level_struct *l, struct Thread *threading ) {
   if ( l->depth == 0 ) {
-//     int ivs = l->next_level->inner_vector_size, vs = l->next_level->vector_size, bvs = l->inner_vector_size;
-//     double tmp;
-//     vector_PRECISION ee = NULL, v = NULL;
-    
-//     MALLOC( ee, complex_PRECISION, bvs );
-//     MALLOC( v, complex_PRECISION, vs );
-//     vector_PRECISION_define( ee, 1, 0, bvs, l );
-//     vector_PRECISION_define( v, 0, 0, vs, l );
-    
-//     restrict_PRECISION( v, ee, l, threading );
-//     tmp = global_norm_PRECISION( v, 0, ivs, l->next_level, threading );
-//     printf0("\nnorm restriction on ones before iter: %+.14lf\n", tmp);
-//     for (int i=0; i<5; i++)
-//       printf0("%+.16lf%+.16lfi ",CSPLIT(v[i]));
-    
     switch ( g.interpolation ) {
       case 2: inv_iter_inv_fcycle_PRECISION( setup_iter, l, threading ); break;
       case 3: inv_iter_inv_fcycle_PRECISION( setup_iter, l, threading ); break;
@@ -543,15 +528,6 @@ void iterative_PRECISION_setup( int setup_iter, level_struct *l, struct Thread *
       case 5: iterative_davidson_setup_PRECISION( setup_iter, l, threading ); break;
       default: inv_iter_2lvl_extension_setup_PRECISION( setup_iter, l, threading ); break;
     }
-//     vector_PRECISION_define( v, 0, 0, vs, l );
-//     restrict_PRECISION( v, ee, l, threading );
-//     tmp = global_norm_PRECISION( v, 0, ivs, l->next_level, threading );
-//     printf0("\nnorm restriction on ones after iter: %+.14lf\n", tmp);
-//     for (int i=0; i<5; i++)
-//       printf0("%+.16lf%+.16lfi ",CSPLIT(v[i]));
-//     getchar();
-//     FREE( ee, complex_PRECISION, bvs );
-//     FREE( v, complex_PRECISION, vs );
   }
 
   level_struct *lp = l;

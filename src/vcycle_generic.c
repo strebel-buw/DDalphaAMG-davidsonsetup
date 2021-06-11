@@ -120,92 +120,7 @@ void vcycle_PRECISION( vector_PRECISION phi, vector_PRECISION Dphi, vector_PRECI
               coarse_solve_odd_even_PRECISION( &(l->next_level->p_PRECISION), &(l->next_level->oe_op_PRECISION), l->next_level, threading );
             }
           } else {
-            
-//     int ivs = l->next_level->inner_vector_size, vs = l->next_level->vector_size, bvs = l->inner_vector_size;
-//     double tmp;
-//     vector_PRECISION ee = NULL, e = NULL, v = NULL, vv = NULL;
-//     
-//     MALLOC( e, complex_PRECISION, vs );
-//     MALLOC( ee, complex_PRECISION, bvs );
-//     MALLOC( v, complex_PRECISION, vs );
-//     MALLOC( vv, complex_PRECISION, bvs );
-//     
-//     printf0("Inner Vectorsize = %d, Vectorsize = %d, Big Inner Vectorsize = %d\n", ivs, vs, bvs);
-//     vector_PRECISION_define( e, 1, 0, vs, l );
-//     vector_PRECISION_define( v, 0, 0, vs, l );
-//     vector_PRECISION_define_random( ee, 0, bvs, l );
-//     vector_PRECISION_define( vv, 1, 0, bvs, l );
-// 
-//     interpolate3_PRECISION( ee, e, l, threading );
-//     restrict_PRECISION( v, ee, l, threading );
-//     tmp = global_norm_PRECISION( ee, 0, bvs, l, threading );
-//     printf0("\nnorm P*P ones: %+.14lf\n", tmp);
-//     for( int j = 0; j<5; j++ ) {
-//       printf0("%+.14lf%+.14lfi ", CSPLIT(v[j]));
-//     }
-//     
-//     restrict_PRECISION( v, vv, l, threading );
-//     interpolate3_PRECISION( ee, v, l, threading );
-//     tmp = global_norm_PRECISION( ee, 0, bvs, l, threading );
-//     printf0("\nnorm PP* ones: %+.14lf\n", tmp);
-//     for( int j = 0; j<5; j++ ) {
-//       printf0("%+.14lf%+.14lfi ", CSPLIT(ee[j]));
-//     }
-//     getchar();
-//     interpolate3_PRECISION( vv, e, l, threading );
-//     tmp = global_norm_PRECISION( vv, 0, bvs, l, threading );
-//     printf0("\nnorm interpolation3 on ones: %+.14lf\n", tmp);
-//     
-//     restrict_PRECISION( v, ee, l, threading );
-//     tmp = global_norm_PRECISION( v, 0, ivs, l->next_level, threading );
-//     printf0("\nnorm restriction on ones: %+.14lf\n", tmp);
-    
-//       apply_operator_PRECISION( v, e, &(l->next_level->p_PRECISION) ,l->next_level, threading );
-//       vector_PRECISION bufx = l->next_level->p_PRECISION.b;
-//       l->next_level->p_PRECISION.b = e;
-//       fgmres_PRECISION( &(l->next_level->p_PRECISION), l->next_level, threading );
-//       l->next_level->p_PRECISION.b = bufx;
-//       printf0("coarse solve on ones: \n");
-//     for( int j = 0; j<5; j++ ) {
-//       printf0("%+.14lf%+.14lfi ", CSPLIT(l->next_level->p_PRECISION.x[j]));
-//     }
-//       tmp = global_norm_PRECISION( l->next_level->p_PRECISION.x, 0, ivs, l->next_level, threading );
-//       printf0("\n norm = %+.14lf; \n", tmp);
-//     printf0("];");
-// //       getchar();
-//     FREE( e, complex_PRECISION, vs );
-//     FREE( ee, complex_PRECISION, bvs );
-//     FREE( v, complex_PRECISION, vs );
-//     FREE( vv, complex_PRECISION, bvs );
-//     getchar();
-//     
-//         printf0("eta\n");
-//     for( int j = 0; j<5; j++ ) {
-//       printf0("%+.14lf%+.14lfi ", CSPLIT(eta[j]));
-//     }
-//       tmp = global_norm_PRECISION( eta, 0, bvs, l->next_level, threading );
-//       printf0("\n%+.14lf; \n", tmp);
-//     
-//     printf0("r_sub pre coarse op\n");
-//     for( int j = 0; j<5; j++ ) {
-//       printf0("%+.14lf%+.14lfi ", CSPLIT(l->next_level->p_PRECISION.b[j]));
-//     }
-//     tmp = global_norm_PRECISION( l->next_level->p_PRECISION.b, 0, ivs, l->next_level, threading );
-//     printf0("\n%+.14lf; \n", tmp);
-//             tmp = global_norm_PRECISION( l->next_level->p_PRECISION.b, 0, ivs, l->next_level, threading );
-//             printf0("real fgmres b: %+.14lf; \n", tmp);
-//             for( int j = 0; j<5; j++ ) {
-//               printf0("%+.14lf%+.14lfi ", CSPLIT(l->next_level->p_PRECISION.b[j]));
-//             }
-      
             fgmres_PRECISION( &(l->next_level->p_PRECISION), l->next_level, threading );
-//             tmp = global_norm_PRECISION( l->next_level->p_PRECISION.x, 0, ivs, l->next_level, threading );
-//             printf0("real fgmres x: %+.14lf; \n", tmp);
-//             for( int j = 0; j<5; j++ ) {
-//               printf0("%+.14lf%+.14lfi ", CSPLIT(l->next_level->p_PRECISION.x[j]));
-//             }
-//       getchar();
-
           }
         }
         START_MASTER(threading)
@@ -215,10 +130,6 @@ void vcycle_PRECISION( vector_PRECISION phi, vector_PRECISION Dphi, vector_PRECI
       }
       if( i == 0 && res == _NO_RES ) {
         interpolate3_PRECISION( phi, l->next_level->p_PRECISION.x, l, threading );
-//             printf0("norm phi post coarse op\n");
-//             double tmp = global_norm_PRECISION( phi, 0, l->inner_vector_size, l, threading );
-//             printf0("%+.14lf; \n", tmp);
-//             getchar();
       }
       else
         interpolate_PRECISION( phi, l->next_level->p_PRECISION.x, l, threading );
